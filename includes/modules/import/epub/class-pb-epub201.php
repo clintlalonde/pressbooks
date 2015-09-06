@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 
@@ -39,7 +39,7 @@ class Epub201 extends Import {
 
 
 	/**
-	 * If PressBooks generated the epub file
+	 * If Pressbooks generated the epub file
 	 *
 	 * @var boolean
 	 */
@@ -303,7 +303,7 @@ class Epub201 extends Import {
 			$new_post['post_parent'] = $chapter_parent;
 		}
 
-		$pid = wp_insert_post( $new_post );
+		$pid = wp_insert_post( add_magic_quotes( $new_post ) );
 
 		update_post_meta( $pid, 'pb_show_title', 'on' );
 		update_post_meta( $pid, 'pb_export', 'on' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks\Export\Epub;
@@ -852,9 +852,9 @@ class Epub201 extends Export {
 		}
 
 		// Copyright
-		// Please be kind, help PressBooks grow by leaving this on!
+		// Please be kind, help Pressbooks grow by leaving this on!
 		if ( empty( $GLOBALS['PB_SECRET_SAUCE']['TURN_OFF_FREEBIE_NOTICES_EPUB'] ) ) {
-			$freebie_notice = 'This book was produced using <a href="http://pressbooks.com/">PressBooks.com</a>.';
+			$freebie_notice = 'This book was produced using <a href="http://pressbooks.com/">Pressbooks.com</a>.';
 			$html .= "<p>$freebie_notice</p>";
 		}
 
@@ -996,10 +996,7 @@ class Epub201 extends Export {
 			$sections = \PressBooks\Book::getSubsections( $id );
 			
 			if ( $sections ) {
-				$s = 1;
-				while ( strpos( $content, '<h1>' ) !== false ) {
-				    $content = preg_replace('/<h1>/', '<h1 class="section-header" id="section-' . $s++ . '">', $content, 1);
-				}
+				$content = \PressBooks\Book::tagSubsections( $content );
 			}
 
 			if ( $author ) {
@@ -1056,7 +1053,7 @@ class Epub201 extends Export {
 			$filename = "{$file_id}.{$this->filext}";
 
 			$vars = array(
-				'post_title' =>  __( 'Make your own books using PressBooks.com', 'pressbooks' ),
+				'post_title' =>  __( 'Make your own books using Pressbooks.com', 'pressbooks' ),
 				'stylesheet' => $this->stylesheet,
 				'post_content' => $this->kneadHtml( $promo_html, 'custom' ),
 				'isbn' => @$metadata['pb_ebook_isbn'],
@@ -1139,10 +1136,7 @@ class Epub201 extends Export {
 				$sections = \PressBooks\Book::getSubsections( $id );
 				
 				if ( $sections ) {
-					$s = 1;
-					while ( strpos( $content, '<h1>' ) !== false ) {
-					    $content = preg_replace('/<h1>/', '<h1 class="section-header" id="section-' . $s++ . '">', $content, 1);
-					}
+					$content = \PressBooks\Book::tagSubsections( $content );
 				}
 
 				if ( $author ) {
@@ -1336,10 +1330,7 @@ class Epub201 extends Export {
 			$sections = \PressBooks\Book::getSubsections( $id );
 			
 			if ( $sections ) {
-				$s = 1;
-				while ( strpos( $content, '<h1>' ) !== false ) {
-				    $content = preg_replace('/<h1>/', '<h1 class="section-header" id="section-' . $s++ . '">', $content, 1);
-				}
+				$content = \PressBooks\Book::tagSubsections( $content );
 			}
 
 			if ( $author ) {
@@ -1851,7 +1842,7 @@ class Epub201 extends Export {
 		if ( ! $last_part )
 			return false;
 
-		$lookup = \PressBooks\Book::getBookStructure();
+    $lookup = \PressBooks\Book::getBookStructure('', true);
 		$lookup = $lookup['__export_lookup'];
 
 		if ( ! isset( $lookup[$last_part] ) )

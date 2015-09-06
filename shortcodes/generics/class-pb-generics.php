@@ -1,6 +1,6 @@
 <?php
 /**
- * @author   PressBooks <code@pressbooks.com>
+ * @author   Pressbooks <code@pressbooks.com>
  * @license  GPLv2 (or any later version)
  */
 namespace PressBooks\Shortcodes\Generics;
@@ -48,6 +48,7 @@ class Generics {
                     }   
 					$class = ' class="' . implode( ' ', $classnames ) . '"';
 				}
+				$content = wpautop( trim( $content ) );
 				return '<' . $tag . $class . '>' . do_shortcode( $content ) . '</' . $tag . '>';
 			} );
 		}

@@ -1,6 +1,6 @@
 <?php
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks\Export;
@@ -188,7 +188,7 @@ abstract class Export {
 			return str_replace( 'wordpress@', 'pressbooks@', $from_email );
 		} );
 		add_filter( 'wp_mail_from_name', function ( $from_name ) {
-			return 'PressBooks';
+			return 'Pressbooks';
 		} );
 
 		foreach ( $this->errorsEmail as $email ) {
@@ -463,7 +463,7 @@ abstract class Export {
 
 			// evaluate it for errors
 			if ( ! false === $result || ! isset( $result->html ) ) {
-				throw new \Exception( 'Creative Commons license API not returning expected results at PressBooks\Metadata::getLicenseXml' );
+				throw new \Exception( 'Creative Commons license API not returning expected results at Pressbooks\Metadata::getLicenseXml' );
 			} else {
 				// process the response, return html
 				$html = Metadata::getWebLicenseHtml( $result->html );
@@ -589,6 +589,9 @@ abstract class Export {
 			if ( isset( $x['pdf'] ) ) {
 				$modules[] = '\PressBooks\Export\Prince\Pdf';
 			}
+			if ( isset( $x['mpdf'] ) ) {
+				$modules[] = '\PressBooks\Export\Mpdf\Pdf';
+			}
 			if ( isset( $x['epub'] ) ) {
 				$modules[] = '\PressBooks\Export\Epub\Epub201'; // Must be set before MOBI
 			}
@@ -609,6 +612,9 @@ abstract class Export {
 			}
 			if ( isset ( $x['vanillawxr'] ) ){
 				$modules[] = '\PressBooks\Export\WordPress\VanillaWxr';
+			}
+			if ( isset ( $x['odt'] ) ){
+				$modules[] = '\PressBooks\Export\Odt\Odt';
 			}
 
 			// --------------------------------------------------------------------------------------------------------

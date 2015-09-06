@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 
@@ -54,9 +54,14 @@ class Xhtml extends Import {
 		$author = ( isset( $meta['authors'] )) ? $meta['authors'] : $this->getAuthors( $html );
 		$license = ( isset( $meta['license'] )) ? $this->extractCCLicense( $meta['license'] ) : '';
 
-		// get the title
-		preg_match( '/<title>(.+)<\/title>/', $html, $matches );
-		$title = ( ! empty( $matches[1] ) ? wp_strip_all_tags( $matches[1] ) : '__UNKNOWN__' );
+		// get the title, preference to title set by PB
+		preg_match( '/<h2 class="entry-title">(.*)<\/h2>/', $html, $matches );
+		if ( ! empty( $matches[1] ) ) {
+			$title = wp_strip_all_tags( $matches[1] );
+		} else {
+			preg_match( '/<title>(.+)<\/title>/', $html, $matches );
+			$title = ( ! empty( $matches[1] ) ? wp_strip_all_tags( $matches[1] ) : '__UNKNOWN__' );
+		}
 
 		// just get the body
 		preg_match( '/(?:<body[^>]*>)(.*)<\/body>/isU', $html, $matches );
@@ -80,7 +85,7 @@ class Xhtml extends Import {
 			$new_post['post_parent'] = $chapter_parent;
 		}
 
-		$pid = wp_insert_post( $new_post );
+		$pid = wp_insert_post( add_magic_quotes( $new_post ) );
 		
 		if( ! empty( $author )){
 			update_post_meta( $pid, 'pb_section_author', $author );
@@ -208,7 +213,11 @@ class Xhtml extends Import {
 		// general content area, greedy
 		preg_match( '/(?:<div id="content"[^>]*>)(.*)<\/div>/is', $html, $matches );
 		$html = ( ! empty( $matches[1] )) ? $matches[1] : $html;
-
+		
+		// specific PB content area, greedy
+		preg_match( '/(?:<div class="entry-content"[^>]*>)(.*)<\/div>/is', $html, $matches );
+		$html = ( ! empty( $matches[1] )) ? $matches[1] : $html;
+		
 		/* cull */
 		// get rid of script tags, ungreedy
 		$result = preg_replace( '/(?:<script[^>]*>)(.*)<\/script>/isU', '', $html );

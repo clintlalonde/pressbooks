@@ -1,12 +1,11 @@
 <?php
 /**
- * Look and feel.
+ * Administration interface look and feel.
  *
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks\Admin\Laf;
-
 
 /**
  * Add a custom message in admin footer
@@ -14,7 +13,7 @@ namespace PressBooks\Admin\Laf;
 function add_footer_link() {
 
 	printf(
-		'<p id="footer-left" class="alignleft"><span id="footer-thankyou">%s <a href="http://pressbooks.com">PressBooks</a></span> &bull; <a href="http://pressbooks.com/about">%s</a> &bull; <a href="http://pressbooks.com/help">%s</a> &bull; <a href="http://pressbooks.com/contact">%s</a></p>',
+		'<p id="footer-left" class="alignleft"><span id="footer-thankyou">%s <a href="http://pressbooks.com">Pressbooks</a></span> &bull; <a href="http://pressbooks.com/about">%s</a> &bull; <a href="http://pressbooks.com/help">%s</a> &bull; <a href="http://pressbooks.com/contact">%s</a></p>',
 		__( 'Powered by', 'pressbooks' ),
 		__( 'About', 'pressbooks' ),
 		__( 'Help', 'pressbooks' ),
@@ -28,37 +27,11 @@ function add_footer_link() {
 	}
 }
 
-
 /**
- * Add a feedback dialogue to admin header
- */
-function add_feedback_dialogue() {
-
-	?>
-<div id="myModal" class="modal hide fade">
-	<div class="modal-header">
-		<a class="close" data-dismiss="modal">&times;</a>
-
-		<h3><?php _e( 'Feedback', 'pressbooks' ); ?></h3>
-	</div>
-	<div class="modal-body">
-		<p>Do you have questions, feedback or comments? You can visit our
-		<a href="http://forum.pressbooks.com/" target="_blank">User Forum</a> (sorry, you will have to register there again), or send us an email at
-		<a href="mailto:support@pressbooks.com">support@pressbooks.com</a></p>
-	</div>
-	<div class="modal-footer">
-		<a href="#" class="button-primary alignright" data-dismiss="modal"><?php _e( 'Close', 'pressbooks' ); ?></a>
-	</div>
-</div>
-<a class="admin-feedback-btn" href="#myModal" data-toggle="modal"><?php _e( 'Feedback', 'pressbooks' ); ?></a>
-<?php
-}
-
-/**
- * Replaces 'WordPress' with 'PressBooks' in titles of admin pages.
+ * Replaces 'WordPress' with 'Pressbooks' in titles of admin pages.
  */
 function admin_title( $admin_title ) {
-	$title = str_replace( 'WordPress', 'PressBooks', $admin_title );
+	$title = str_replace( 'WordPress', 'Pressbooks', $admin_title );
 	return $title;
 }
 
@@ -133,20 +106,28 @@ function replace_book_admin_menu() {
 		array_push( $submenu['edit.php?post_type=chapter'], $add_part, $add_chapter, $add_front_matter, $add_back_matter );
 	}
 
-	$chapter_types = $submenu['edit.php?post_type=chapter'][15];
-	$front_matter_types = $submenu['edit.php?post_type=front-matter'][15];
-	$back_matter_types = $submenu['edit.php?post_type=back-matter'][15];
 	unset( $submenu['edit.php?post_type=chapter'][10] );
 	unset( $submenu['edit.php?post_type=chapter'][15] );
 
 	if ( is_super_admin() ) {
 		// If network administrator, give the option to see chapter, front matter and back matter types.
-		array_push(
-			$submenu['edit.php?post_type=chapter'],
-			$chapter_types,
-			$front_matter_types,
-			$back_matter_types
-		);
+		$front_matter_types = $submenu['edit.php?post_type=front-matter'][15];
+		$back_matter_types = $submenu['edit.php?post_type=back-matter'][15];
+		if ( isset( $submenu['edit.php?post_type=chapter'][15] ) ) :
+			$chapter_types = $submenu['edit.php?post_type=chapter'][15];
+			array_push(
+				$submenu['edit.php?post_type=chapter'],
+				$chapter_types,
+				$front_matter_types,
+				$back_matter_types
+			);
+		else :
+			array_push(
+				$submenu['edit.php?post_type=chapter'],
+				$front_matter_types,
+				$back_matter_types
+			);
+		endif;
 	}
 
 	// Book Information
@@ -262,7 +243,7 @@ function replace_menu_bar_branding( $wp_admin_bar ) {
 		'title' => '<span class="ab-icon"></span>',
 		'href' => ( 'http://pressbooks.com/about' ),
 		'meta' => array(
-			'title' => __( 'About PressBooks', 'pressbooks' ),
+			'title' => __( 'About Pressbooks', 'pressbooks' ),
 		),
 	) );
 
@@ -271,7 +252,7 @@ function replace_menu_bar_branding( $wp_admin_bar ) {
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'wp-logo',
 			'id' => 'about',
-			'title' => __( 'About PressBooks', 'pressbooks' ),
+			'title' => __( 'About Pressbooks', 'pressbooks' ),
 			'href' => 'http://pressbooks.com/about',
 		) );
 	}
@@ -280,7 +261,7 @@ function replace_menu_bar_branding( $wp_admin_bar ) {
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'wp-logo-external',
 		'id' => 'wporg',
-		'title' => __( 'PressBooks.com', 'pressbooks' ),
+		'title' => __( 'Pressbooks.com', 'pressbooks' ),
 		'href' => 'http://pressbooks.com',
 	) );
 
@@ -341,32 +322,32 @@ function replace_menu_bar_my_sites( $wp_admin_bar ) {
 
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'my-books-super-admin',
-			'id' => 'network-admin',
+			'id' => 'pb-network-admin',
 			'title' => __( 'Network Admin', 'pressbooks' ),
 			'href' => network_admin_url(),
 		) );
 
 		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id' => 'network-admin-d',
+			'parent' => 'pb-network-admin',
+			'id' => 'pb-network-admin-d',
 			'title' => __( 'Dashboard', 'pressbooks' ),
 			'href' => network_admin_url(),
 		) );
 		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id' => 'network-admin-s',
+			'parent' => 'pb-network-admin',
+			'id' => 'pb-network-admin-s',
 			'title' => __( 'Sites', 'pressbooks' ),
 			'href' => network_admin_url( 'sites.php' ),
 		) );
 		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id' => 'network-admin-u',
+			'parent' => 'pb-network-admin',
+			'id' => 'pb-network-admin-u',
 			'title' => __( 'Users', 'pressbooks' ),
 			'href' => network_admin_url( 'users.php' ),
 		) );
 		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id' => 'network-admin-v',
+			'parent' => 'pb-network-admin',
+			'id' => 'pb-network-admin-v',
 			'title' => __( 'Visit Network', 'pressbooks' ),
 			'href' => network_home_url(),
 		) );
@@ -522,7 +503,7 @@ function init_css_js() {
 	$concatenate_scripts = false;
 
 	// Note: Will auto-register a dependency $handle named 'colors'
-	wp_admin_css_color( 'pb_colors', 'PressBooks', PB_PLUGIN_URL . 'assets/css/colors-pb.css', apply_filters( 'pressbooks_admin_colors', array( '#b40026', '#d4002d', '#e9e9e9', '#dfdfdf' ) ) );
+	wp_admin_css_color( 'pb_colors', 'Pressbooks', PB_PLUGIN_URL . 'assets/css/colors-pb.css', apply_filters( 'pressbooks_admin_colors', array( '#b40026', '#d4002d', '#e9e9e9', '#dfdfdf' ) ) );
 
 	wp_deregister_style( 'pressbooks-book' ); // Theme's CSS
 	wp_register_style( 'pressbooks-admin', PB_PLUGIN_URL . 'assets/css/pressbooks.css', array(), '20140110', 'screen' );
@@ -585,7 +566,7 @@ function redirect_away_from_bad_urls() {
 		return; // Do nothing
 
 	$check_against_url = parse_url( ( is_ssl() ? 'http://' : 'https://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], PHP_URL_PATH );
-	$redirecl_url = get_site_url( get_current_blog_id(), '/wp-admin/' );
+	$redirect_url = get_site_url( get_current_blog_id(), '/wp-admin/' );
 
 	// ---------------------------------------------------------------------------------------------------------------
 	// If user is on post-new.php, check for valid post_type
@@ -593,7 +574,7 @@ function redirect_away_from_bad_urls() {
 	if ( preg_match( '~/wp-admin/post-new\.php$~', $check_against_url ) ) {
 		if ( ! in_array( @$_REQUEST['post_type'], \PressBooks\PostType\list_post_types() ) ) {
 			$_SESSION['pb_notices'][] = __( 'Unsupported post type.', 'pressbooks' );
-			\PressBooks\Redirect\location( $redirecl_url );
+			\PressBooks\Redirect\location( $redirect_url );
 		}
 	}
 
@@ -620,7 +601,7 @@ function redirect_away_from_bad_urls() {
 	$expr = '~/wp-admin/(' . implode( '|', $restricted ) . ')\.php$~';
 	if ( preg_match( $expr, $check_against_url ) ) {
 		$_SESSION['pb_notices'][] = __( 'You do not have sufficient permissions to access that URL.', 'pressbooks' );
-		\PressBooks\Redirect\location( $redirecl_url );
+		\PressBooks\Redirect\location( $redirect_url );
 	}
 }
 
@@ -646,10 +627,22 @@ function privacy_settings_init() {
 		'privacy_settings',
 		'privacy_settings_section'
 	);
+	add_settings_field(
+		'permissive_private_content',
+		__( 'Private Content', 'pressbooks' ),
+		__NAMESPACE__ . '\privacy_permissive_private_content_callback',
+		'privacy_settings',
+		'privacy_settings_section'
+	);
 	register_setting(
 		'privacy_settings',
 		'blog_public',
 		__NAMESPACE__ . '\privacy_blog_public_sanitize'
+	);
+	register_setting(
+		'privacy_settings',
+		'permissive_private_content',
+		__NAMESPACE__ . '\privacy_permissive_private_content_sanitize'
 	);
 
 }
@@ -681,6 +674,34 @@ function privacy_blog_public_callback( $args ) {
 	echo $html;
 }
 
+/**
+ * Privacy settings, blog_public field callback
+ *
+ * @param $args
+ */
+function privacy_permissive_private_content_callback( $args ) {
+	$permissive_private_content = absint( get_option( 'permissive_private_content' ) );
+	$subscriber = get_role( 'subscriber' );
+	$contributor = get_role( 'contributor' );
+	$author = get_role( 'author' );
+	if ( $permissive_private_content == 1 ) { // If permissive private content is set to true, adjust capabilities
+		$subscriber->add_cap( 'read_private_posts' );
+		$contributor->add_cap( 'read_private_posts' );
+		$author->add_cap( 'read_private_posts' );
+	} else {
+		$subscriber->remove_cap( 'read_private_posts' );
+		$contributor->remove_cap( 'read_private_posts' );
+		$author->remove_cap( 'read_private_posts' );
+	} ?>
+	<p><?php _e( 'Who can see private front matter, chapters and back matter?', 'pressbooks' ); ?></p>
+	<fieldgroup>
+		<input type="radio" id="standard-private-content" name="permissive_private_content" value="0" <?php checked( $permissive_private_content, 0 ); ?>/>
+		<label for="standard-private-content"><?php _e( 'Only logged in editors and administrators.', 'pressbooks' ); ?></label><br />
+		<input type="radio" id="permissive-private-content" name="permissive_private_content" value="1"  <?php checked( $permissive_private_content, 1 ); ?>/>
+		<label for="permissive-private-content"><?php _e( 'All logged in users including subscribers.', 'pressbooks' ); ?></label>
+	</fieldgroup>
+<?php }
+
 
 /**
  * Privacy settings, blog_public field sanitization
@@ -692,6 +713,15 @@ function privacy_blog_public_sanitize( $input ) {
 	return absint( $input );
 }
 
+/**
+ * Privacy settings, private_chapters field sanitization
+ *
+ * @param $input
+ * @return string
+ */
+function privacy_permissive_private_content_sanitize( $input ) {
+	return absint( $input );
+}
 
 /**
  * Display Privacy settings
@@ -943,7 +973,7 @@ function advanced_email_validation_logs_callback( $args ) {
 	if ( $email_validation_logs ) $html .= 'checked="checked" ';
 	$html .= '/>';
 	$html .= '<label for="no-validation-logs"> ' . __( 'Yes. Send the logs.', 'pressbooks' ) . '</label>';
-	$html .= '<br /><br /><em> ' . __( 'Note: validation error reports (for EPUB, Mobi, and PDF) are technical, and will require some effort to decipher. Unfortunately we cannot provide support for deciphering validation errors, but you could post errors on the <a href="http://forum.pressbooks.com/" target="_blank">PressBooks forum</a>, where we and other PressBooks users can help out as time permits. .', 'pressbooks' ) . '</em>';
+	$html .= '<br /><br /><em> ' . __( 'Note: validation error reports (for EPUB, Mobi, and PDF) are technical, and will require some effort to decipher. Unfortunately we cannot provide support for deciphering validation errors, but you could post errors on the <a href="http://forum.pressbooks.com/" target="_blank">Pressbooks forum</a>, where we and other Pressbooks users can help out as time permits. .', 'pressbooks' ) . '</em>';
 
 	echo $html;
 }

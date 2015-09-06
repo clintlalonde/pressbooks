@@ -1,6 +1,6 @@
 <?php
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks\Sanitize;
@@ -37,6 +37,8 @@ function html5_to_xhtml11( $t, $C = array(), $S = array() ) {
 
 	$t = preg_replace( $search_open, $replace_open, str_replace( $search_closed, $replace_closed, $t ) );
 
+	$t = preg_replace( '/(id=\"audio[0-9\-]*\")(.*)(style="[^\"]*\")/ui', "$1", $t );
+	
 	return $t;
 }
 

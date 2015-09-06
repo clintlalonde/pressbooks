@@ -2,9 +2,9 @@
 /**
  * This class has two purposes:
  *  + Handle the custom metadata post, i.e. "Book Information". There should only be one metadata post per book.
- *  + Perform upgrades on individual books as PressBooks evolves
+ *  + Perform upgrades on individual books as Pressbooks evolves
  *
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks;
@@ -121,7 +121,7 @@ class Metadata {
 		    'keywords' => 'pb_keywords_tags',
 		    'publisher' => 'pb_publisher'
 		);
-		$html = "<meta name='application-name' content='PressBooks'>\n";
+		$html = "<meta name='application-name' content='Pressbooks'>\n";
 		$metadata = Book::getBookInformation();
 
 		// create meta elements
@@ -175,7 +175,7 @@ class Metadata {
 
 	/**
 	 * Takes a known string from metadata, builds a url to hit an api which returns an xml response
-	 * @see http://api.creativecommons.org/docs/readme_15.html
+	 * @see https://api.creativecommons.org/docs/readme_15.html
 	 * 
 	 * @param string $type license type
 	 * @param string $copyright_holder of the page
@@ -184,7 +184,7 @@ class Metadata {
 	 * @return string $xml response
 	 */
 	static function getLicenseXml( $type, $copyright_holder, $src_url, $title, $lang = '' ) {
-		$endpoint = 'http://api.creativecommons.org/rest/1.5/';
+		$endpoint = 'https://api.creativecommons.org/rest/1.5/';
 		$xml = '';
 		$lang = ( ! empty( $lang ) ) ? substr( $lang, 0, 2 ) : '';
 		$expected = array(
@@ -237,7 +237,7 @@ class Metadata {
 			case 'all-rights-reserved':
 				$xml = "<result><html>"
 					. "<span property='dct:title'>" . Sanitize\sanitize_xml_attribute( $title ) . "</span> &#169; "
-					. Sanitize\sanitize_xml_attribute( $copyright_holder ) . __( 'All Rights Reserved', 'pressbooks' ) . ".</html></result>";
+					. Sanitize\sanitize_xml_attribute( $copyright_holder ) . '. ' . __( 'All Rights Reserved', 'pressbooks' ) . ".</html></result>";
 				break;
 
 //			case 'other':
@@ -289,8 +289,7 @@ class Metadata {
 			$content = $response->asXML();
 			$content = trim( str_replace( array( '<p xmlns:dct="http://purl.org/dc/terms/">', '</p>', '<html>', '</html>' ), array( '', '', '', '' ), $content ) );
 
-			$html = '<div class="license-attribution" xmlns:cc="http://creativecommons.org/ns#"><p xmlns:dct="http://purl.org/dc/terms/">'
-				. rtrim( $content, "." ) . ', ' . __("except where otherwise noted", "pressbooks") .'</p></div>';
+			$html = '<div class="license-attribution" xmlns:cc="http://creativecommons.org/ns#"><p xmlns:dct="http://purl.org/dc/terms/">' . rtrim( $content, "." ) . ', ' . __("except where otherwise noted.", "pressbooks") .'</p></div>';
 		}
 
 		return html_entity_decode( $html, ENT_XHTML, 'UTF-8' );
@@ -407,7 +406,7 @@ class Metadata {
 	 */
 	function upgradeBook() {
 
-		$book_structure = Book::getBookStructure();
+    $book_structure = Book::getBookStructure('', true);
 		foreach ( $book_structure['__order'] as $post_id => $_ ) {
 
 			$meta = get_post_meta( $post_id );

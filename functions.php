@@ -2,7 +2,7 @@
 /**
  * Shortcuts for template designers who don't use real namespaces, and other helper functions.
  *
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 
@@ -224,8 +224,12 @@ function pb_get_chapter_number( $post_name ) {
 	foreach ( $lookup as $key => $val ) {
 		if ( 'chapter' == $val ) {
 			$chapter = get_posts( array( 'name' => $key, 'post_type' => 'chapter', 'post_status' => 'publish', 'numberposts' => 1 ) );
-			$type = pb_get_section_type( $chapter[0] );
-			if ( $type !== 'numberless' ) ++$i;
+			if ( isset( $chapter[0] ) ) {
+				$type = pb_get_section_type( $chapter[0] );
+				if ( $type !== 'numberless' ) ++$i;
+			} else {
+				return 0;
+			}
 			if ( $key == $post_name ) break;
 		}
 	}
@@ -276,6 +280,17 @@ function pb_get_sections( $id ) {
  */
 function pb_should_parse_sections() {
 	return \PressBooks\Export\Export::shouldParseSections();
+}
+
+/**
+ * Tag the subsections
+ *
+ * @param $content string
+ *
+ * @return string
+ */
+function pb_tag_sections( $content ) {
+	return \PressBooks\Book::tagSubsections( $content );
 }
 
 /**

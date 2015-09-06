@@ -4,7 +4,7 @@
  * complete representation of an idea, or set of ideas; emotion or set of emotions; and transmitted to readers in
  * various formats.
  *
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks;
@@ -101,7 +101,8 @@ class Book {
 				continue;
 
 			if ( false !== in_array( $key, $expected_the_content ) ) {
-				$val = apply_filters( 'the_content', $val );
+				$val = wptexturize( $val );
+				$val = wpautop( $val );
 			} else {
 				$val = htmlspecialchars( $val, ENT_NOQUOTES | ENT_XHTML, 'UTF-8', false );
 			}
@@ -110,6 +111,17 @@ class Book {
 			$val = \PressBooks\Sanitize\remove_control_characters( $val );
 
 			$book_information[$key] = $val;
+		}
+		
+		// Return our best guess if no book information has been entered.
+		if ( empty( $book_information ) ) {
+			$book_information['pb_title'] = get_bloginfo( 'name' );
+			if ( !function_exists( 'get_user_by' ) ) {
+			    include( ABSPATH . 'wp-includes/pluggable.php' ); 
+			}
+			$author = get_user_by( 'email', get_bloginfo( 'admin_email' ) );
+			$book_information['pb_author'] = $author->display_name;
+			$book_information['pb_cover_image'] = \PressBooks\Image\default_cover_url();
 		}
 
 		// -----------------------------------------------------------------------------
@@ -133,7 +145,7 @@ class Book {
 	 * @see bottom of this file for more info
 	 * @return array
 	 */
-	static function getBookStructure( $id = '' ) {
+	static function getBookStructure( $id = '', $get_pb_export_meta=false  ) {
 
 		// -----------------------------------------------------------------------------
 		// Is cached?
@@ -185,6 +197,12 @@ class Book {
 
 				$post_name = static::fixSlug( $post->post_name );
 
+        if($get_pb_export_meta) {
+          $export = ( get_post_meta( $post->ID, 'pb_export', true ) ? true : false );
+        } else {
+          $export = false;
+        }
+
 				$book_structure[$type][] = array(
 					'ID' => $post->ID,
 					'post_title' => $post->post_title,
@@ -193,7 +211,7 @@ class Book {
 					'comment_count' => $post->comment_count,
 					'menu_order' => $post->menu_order,
 					'post_status' => $post->post_status,
-					'export' => ( get_post_meta( $post->ID, 'pb_export', true ) ? true : false ),
+					'export' => $export,
 					'post_parent' => $post->post_parent,
 				);
 			}
@@ -295,7 +313,7 @@ class Book {
 		// Precedence when using the + operator to merge arrays is from left to right
 		// -----------------------------------------------------------------------------
 
-		$book_contents = static::getBookStructure();
+    $book_contents = static::getBookStructure('', true);
 
 		foreach ( $book_contents as $type => $struct ) {
 
@@ -349,16 +367,38 @@ class Book {
 		$parent = get_post( $id );
 		$output = array();
 		$s = 1;
+		$content = mb_convert_encoding(apply_filters( 'the_content', $parent->post_content ), 'HTML-ENTITIES', 'UTF-8');
 		$html = new \DOMDocument();
-		$html->loadHTML( apply_filters( 'the_content', $parent->post_content ) );
-		$xpath = new \DOMXpath($html);
-		foreach( $xpath->query('/html/body/section/h1|/html/body/h1') as $node ) {
-			$output['section-' . $s] = $node->nodeValue;
+		$html->loadHTML( $content );
+		$sections = $html->getElementsByTagName('h1');
+		foreach( $sections as $section ) {
+			$output['section-' . $s] = $section->textContent;
 			$s++;
 		}
 		if ( empty( $output ) )
 			$output = false;
 		return $output;
+	}
+
+	/**
+	 * Returns chapter, front or back matter content with section ID and classes added.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	static function tagSubsections( $content ) {
+		$content = mb_convert_encoding( $content, 'HTML-ENTITIES', 'UTF-8' );
+		$html = new \DOMDocument();
+		$html->loadHTML( $content );
+		$sections = $html->getElementsByTagName('h1');
+		$s = 1;
+		foreach ( $sections as $section ) {
+		    $section->setAttribute( 'id','section-' . $s++ );
+		    $section->setAttribute( 'class','section-header' );
+		}
+		error_log('a-ok');
+		return preg_replace( '/^<!DOCTYPE.+?>/', '', str_replace( array( '<html>', '</html>', '<body>', '</body>', '<br>' ), array( '', '', '', '', '<br />' ), $html->saveHTML() ) );
 	}
 
 	/**
@@ -538,6 +578,8 @@ class Book {
 		if ( 'first' == $what )
 			return static::getFirst();
 
+		global $blog_id;
+		
 		global $post;
 
 		$current_post_id = $post->ID;
@@ -562,6 +604,10 @@ class Book {
 		while ( $post_id = current( $pos ) ) {
 			if ( $order[$post_id]['post_status'] == 'publish' ) {
 				break;
+			} elseif ( current_user_can_for_blog( $blog_id, 'read_private_posts' ) ) {
+				break;
+			} elseif ( get_option( 'permissive_private_content' ) && current_user_can_for_blog( $blog_id, 'read' ) ) {
+				break;
 			} else {
 				$what( $pos );
 			}
@@ -578,6 +624,8 @@ class Book {
 	 */
 	static function getFirst() {
 
+		global $blog_id;
+
 		$book_structure = static::getBookStructure();
 		$order = $book_structure['__order'];
 		$pos = array_keys( $order );
@@ -585,6 +633,10 @@ class Book {
 		reset( $pos );
 		while ( $first_id = current( $pos ) ) {
 			if ( $order[$first_id]['post_status'] == 'publish' ) {
+				break;
+			} elseif ( current_user_can_for_blog( $blog_id, 'read_private_posts' ) ) {
+				break;
+			} elseif ( get_option( 'permissive_private_content' ) && current_user_can_for_blog( $blog_id, 'read' ) ) {
 				break;
 			} else {
 				next( $pos );
@@ -750,7 +802,7 @@ class Book {
 /* --------------------------------------------------------------------------------------------------------------------
 
 getBookStructure() and getBookContents() will return a "super array" or a "book object" that contains everything
-PressBooks considers a book. This "book object" is returned in the correct order so that, with straightforward foreach()
+Pressbooks considers a book. This "book object" is returned in the correct order so that, with straightforward foreach()
 logic, a programmer or template designer can render a book however they see fit.
 
  * getBookStructure() returns a minimal subset of get_post( $post->ID, ARRAY_A ) plus our own custom key/values

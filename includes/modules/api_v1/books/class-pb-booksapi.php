@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 
@@ -62,7 +62,7 @@ class BooksApi extends Api {
 		$this->public_books = $this->getPublicBlogIds();
 
 		if ( empty( $this->public_books ) ) {
-			throw new \Exception( 'There are no public facing books in this instance of PressBooks'); 
+			throw new \Exception( 'There are no public facing books in this instance of Pressbooks'); 
 		}
 
 		// get the format, set it as instance variable
@@ -279,8 +279,7 @@ class BooksApi extends Api {
 		foreach ( $book['front-matter'] as $fm ){
 			$chapters[$fm['post_id']] = $fm; 
 		}
-		$chapters = $front_matter;
-		
+
 		// parts
 		for ( $i = 0; $i < $parts_count; $i ++ ) {
 			// chapters
@@ -435,7 +434,7 @@ class BooksApi extends Api {
 				$book[$book_id]['book_id'] = $book_id;
 				$book[$book_id]['book_url'] = get_blogaddress_by_id( $book_id );
 				$book[$book_id]['book_meta'] = \PressBooks\Book::getBookInformation( intval( $book_id ) );
-				$book_structure = \PressBooks\Book::getBookStructure( intval( $book_id ) );
+				$book_structure = \PressBooks\Book::getBookStructure( intval( $book_id ), true );
 				$book[$book_id]['book_toc'] = $this->getToc( $book_structure, $book_id );
 			}
 		} else {
@@ -443,11 +442,10 @@ class BooksApi extends Api {
 			if ( ! in_array( $args['id'], $this->public_books ) ) {
 				return $this->apiErrors( 'empty' );
 			}
-			$book[$args['id']];
 			$book[$args['id']]['book_id'] = $args['id'];
 			$book[$args['id']]['book_url'] = get_blogaddress_by_id( $args['id'] );
 			$book[$args['id']]['book_meta'] = \PressBooks\Book::getBookInformation( intval( $args['id'] ) );
-			$book_structure = \PressBooks\Book::getBookStructure( intval( $args['id'] ) );
+			$book_structure = \PressBooks\Book::getBookStructure( intval( $args['id'] ), true );
 			$book[$args['id']]['book_toc'] = $this->getToc( $book_structure, $args['id'] );
 		}
 
@@ -533,6 +531,7 @@ class BooksApi extends Api {
 			    'post_link' => get_permalink( $book['part'][$i]['ID'] ),
 			    'chapters' => $chapters,
 			);
+			unset( $chapters );
 		}
 
 		// back-matter

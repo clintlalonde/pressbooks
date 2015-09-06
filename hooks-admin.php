@@ -1,6 +1,6 @@
 <?php
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 
@@ -15,7 +15,7 @@ require( PB_PLUGIN_DIR . 'admin/pb-admin-dashboard.php' );
 require( PB_PLUGIN_DIR . 'admin/pb-admin-laf.php' );
 require( PB_PLUGIN_DIR . 'admin/pb-admin-metaboxes.php' );
 require( PB_PLUGIN_DIR . 'admin/pb-admin-customcss.php' );
-require( PB_PLUGIN_DIR . 'symbionts/search-regex/search-regex.php' );
+require( PB_PLUGIN_DIR . 'includes/pb-network-managers.php' );
 
 // -------------------------------------------------------------------------------------------------------------------
 // Look & feel of admin interface and Dashboard
@@ -28,7 +28,6 @@ add_action( 'admin_bar_menu', '\PressBooks\Admin\Laf\remove_menu_bar_update', 41
 add_action( 'admin_bar_menu', '\PressBooks\Admin\Laf\remove_menu_bar_new_content', 71 );
 
 // Add contact Info
-add_action( 'admin_head', '\PressBooks\Admin\Laf\add_feedback_dialogue' );
 add_filter( 'admin_footer_text', '\PressBooks\Admin\Laf\add_footer_link' );
 
 if ( \PressBooks\Book::isBook() ) {
@@ -58,11 +57,17 @@ add_action( 'admin_init', '\PressBooks\Admin\Laf\privacy_settings_init' );
 add_action( 'admin_init', '\PressBooks\Admin\Laf\ecomm_settings_init' );
 add_action( 'admin_init', '\PressBooks\Admin\Laf\advanced_settings_init' );
 
-//  Replaces 'WordPress' with 'PressBooks' in titles of admin pages.
+//  Replaces 'WordPress' with 'Pressbooks' in titles of admin pages.
 add_filter( 'admin_title', '\PressBooks\Admin\Laf\admin_title' );
 
 // Echo our notices, if any
 add_action( 'admin_notices', '\PressBooks\Admin\Laf\admin_notices' );
+
+// Network Manager routines
+add_action( 'network_admin_menu', '\PressBooks\Admin\NetworkManagers\add_menu' );
+add_action( 'wp_ajax_pb_update_admin_status', '\PressBooks\Admin\NetworkManagers\update_admin_status' );
+add_action( 'network_admin_menu', '\PressBooks\Admin\NetworkManagers\hide_menus' );
+add_action( 'admin_init', '\PressBooks\Admin\NetworkManagers\restrict_access' );
 
 // -------------------------------------------------------------------------------------------------------------------
 // Posts, Meta Boxes
@@ -173,6 +178,23 @@ if ( \PressBooks\Book::isBook() ) {
 		unset ( $actions['preview'] );
 		return $actions;
 	} );
+
+	// Check mpdf export paths
+	if ( \PressBooks\Utility\show_experimental_features() ) {
+		add_action( 'admin_notices', function () {
+			$paths = array(
+				PB_PLUGIN_DIR . 'symbionts/mpdf/ttfontdata',
+				PB_PLUGIN_DIR . 'symbionts/mpdf/tmp',
+				PB_PLUGIN_DIR . 'symbionts/mpdf/graph_cache',
+			);
+	
+			foreach ( $paths as $path ) {
+				if ( ! is_writable( $path ) ) {
+					$_SESSION['pb_errors'][] = sprintf( __('The path "%s" is not writable. Please check and adjust the ownership and file permissions for mpdf export to work properly.', 'pressbooks'), $path );
+				}
+			}
+		} );
+	}
 }
 
 // Hide WP update nag

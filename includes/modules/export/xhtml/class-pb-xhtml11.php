@@ -1,6 +1,6 @@
 <?php
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 namespace PressBooks\Export\Xhtml;
@@ -412,7 +412,9 @@ class Xhtml11 extends Export {
 	 * @return string
 	 */
 	protected function fixInternalLinks( $content ) {
-
+		// takes care of PB subdirectory installations of PB
+		$content = preg_replace("/href\=\"\/([a-z0-9]*)\/(front\-matter|chapter|back\-matter)\/([a-z0-9\-]*)([\/]?)(\#[a-z0-9\-]*)\"/", "href=\"$5\"", $content);	
+		// takes care of PB subdomain installations of PB
 		$content = preg_replace("/href\=\"\/(front\-matter|chapter|back\-matter)\/([a-z0-9\-]*)([\/]?)(\#[a-z0-9\-]*)\"/", "href=\"$4\"", $content);	
 		
 		$output = preg_replace("/href\=\"\/(front\-matter|chapter|back\-matter)\/([a-z0-9\-]*)([\/]?)\"/", "href=\"#$2\"", $content);
@@ -843,9 +845,7 @@ class Xhtml11 extends Export {
 				$sections = \PressBooks\Book::getSubsections( $id );
 				
 				if ( $sections ) {
-					while ( strpos( $content, '<h1>' ) !== false ) {
-					    $content = preg_replace('/<h1>/', '<h1 class="section-header" id="front-matter-section-' . $s++ . '">', $content, 1);
-					}
+					$content = \PressBooks\Book::tagSubsections( $content );
 				}
 
 			if ( $author ) {
@@ -911,18 +911,33 @@ class Xhtml11 extends Export {
 			$part_printf_changed = '';
 			$slug = $part['post_name'];
 			$title = $part['post_title'];
+			$part_content = trim( get_post_meta( $part['ID'], 'pb_part_content', true ) );
 
 			// Inject introduction class?
-			if ( ! $this->hasIntroduction && count( $book_contents['part'] ) > 1 ) {
-				$part_printf_changed = str_replace( '<div class="part %s" id=', '<div class="part introduction %s" id=', $part_printf );
-				$this->hasIntroduction = true;
+			if ( $invisibility !== 'invisible' ) { // visible
+				if ( count( $book_contents['part'] ) == 1 ) { // only part
+					if ( $part_content ) { // has content
+						if ( ! $this->hasIntroduction ) {
+							$part_printf_changed = str_replace( '<div class="part %s" id=', '<div class="part introduction %s" id=', $part_printf );
+							$this->hasIntroduction = true;
+						}
+					}
+				} elseif ( count( $book_contents['part'] ) > 1 ) { // multiple parts
+					if ( ! $this->hasIntroduction ) {
+						$part_printf_changed = str_replace( '<div class="part %s" id=', '<div class="part introduction %s" id=', $part_printf );
+						$this->hasIntroduction = true;
+					}
+				}
 			}
-
+			
 			// Inject part content?
-			$part_content = trim( get_post_meta( $part['ID'], 'pb_part_content', true ) );
 			if ( $part_content ) {
 				$part_content = $this->preProcessPostContent( $part_content );
-				$part_printf_changed = str_replace( '</h1></div>%s</div>', "</h1></div><div class=\"ugc part-ugc\">%s</div></div>", $part_printf );
+				if ( $part_printf_changed ) {
+					$part_printf_changed = str_replace( '</h1></div>%s</div>', "</h1></div><div class=\"ugc part-ugc\">%s</div></div>", $part_printf_changed );
+				} else {
+					$part_printf_changed = str_replace( '</h1></div>%s</div>', "</h1></div><div class=\"ugc part-ugc\">%s</div></div>", $part_printf );
+				}
 			}
 
 			$m = ( $invisibility == 'invisible' ) ? '' : $i;
@@ -955,9 +970,7 @@ class Xhtml11 extends Export {
 				$sections = \PressBooks\Book::getSubsections( $id );
 				
 				if ( $sections ) {
-					while ( strpos( $content, '<h1>' ) !== false ) {
-					    $content = preg_replace('/<h1>/', '<h1 class="section-header" id="section-' . $s++ . '">', $content, 1);
-					}
+					$content = \PressBooks\Book::tagSubsections( $content );
 				}
 
 				if ( $author ) {
@@ -1016,11 +1029,6 @@ class Xhtml11 extends Export {
 				if ( $my_chapters ) echo $my_chapters;
 			}
 
-			// Did we actually inject the introduction class?
-			if ( $part_printf_changed && empty( $my_chapters ) ) {
-				$this->hasIntroduction = false;
-			}
-
 		}
 
 	}
@@ -1055,9 +1063,7 @@ class Xhtml11 extends Export {
 			$sections = \PressBooks\Book::getSubsections( $id );
 			
 			if ( $sections ) {
-				while ( strpos( $content, '<h1>' ) !== false ) {
-				    $content = preg_replace('/<h1>/', '<h1 class="section-header" id="back-matter-section-' . $s++ . '">', $content, 1);
-				}
+				$content = \PressBooks\Book::tagSubsections( $content );
 			}
 
 			if ( $author ) {

@@ -1,40 +1,40 @@
-=== PressBooks ===
+=== Pressbooks ===
 
-Contributors: PressBooks <code@pressbooks.com>
-Version: 2.4.2
+Contributors: Pressbooks <code@pressbooks.com>
+Version: 2.6.1
 Tags: ebooks, publishing, webbooks
-Requires at least: 4.1
-Tested up to: 4.1
-Stable tag: trunk
+Requires at least: 4.3
+Tested up to: 4.3
+Stable tag: 2.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-PressBooks is an open source book publishing tool built on a WordPress multisite platform. PressBooks outputs books in
+Pressbooks is an open source book publishing tool built on a WordPress multisite platform. Pressbooks outputs books in
 multiple formats, including PDF, EPUB, MOBI, web, and a variety of XML flavours, using a theming/templating system,
 driven by CSS. For more information, visit http://pressbooks.com.
 
 == Maintenance and Support ==
 
-Contact us about maintenance and support contracts if you are installing PressBooks on your own servers, or if you would
-like PressBooks to run a dedicated instance for you on our servers. You can reach us at: sales@pressbooks.com.
+Contact us about maintenance and support contracts if you are installing Pressbooks on your own servers, or if you would
+like Pressbooks to run a dedicated instance for you on our servers. You can reach us at: sales@pressbooks.com.
 
 == Communication ==
 
-Our main communication channel for the PressBooks plugin is [Google Groups](http://groups.google.com/group/pressbooks).
+Our main communication channel for the Pressbooks plugin is [GitHub](https://github.com/pressbooks/pressbooks/issues). You can post issues or ask questions there.
 
 == Contributors ==
 
-All PressBooks code is copyright Book Oven Inc. Contributors are acknowledged in the "docs/contributors.txt" file, not
+All Pressbooks code is copyright Book Oven Inc. Contributors are acknowledged in the "docs/contributors.txt" file, not
 in source code headers.
 
 == Installation ==
 
 IMPORTANT!
 
- * Do not install PressBooks on an existing WordPress blog -- create a new WordPress install instead.
- * PressBooks works with PHP 5.4.x and WordPress 4.1. Lower versions are not supported.
+ * Do not install Pressbooks on an existing WordPress blog -- create a new WordPress install instead.
+ * Pressbooks works with PHP 5.4.x and WordPress 4.3. Lower versions are not supported.
 
 *Part 1, WordPress generic:*
 
@@ -51,34 +51,34 @@ IMPORTANT!
  5. Complete the steps printed on the screen (i.e. edit your `wp-config.php` and `.htaccess files` with the information
     provided.)
 
-*Part 2, PressBooks specific:*
+*Part 2, Pressbooks specific:*
 
- 1. Copy/move PressBooks plugin files to: __PATH_TO_YOUR_SITE__/wp-content/plugins/pressbooks/*.
+ 1. Copy/move Pressbooks plugin files to: __PATH_TO_YOUR_SITE__/wp-content/plugins/pressbooks/*.
 
  2. Log out, log in, navigate to: My Sites → Network Admin → Dashboard.
 
  3. Navigate to: Plugins → Installed Plugins.
 
- 4. Network Enable "PressBooks."
+ 4. Network Enable "Pressbooks."
 
  5. Navigate to: Themes → Installed Themes.
 
- 6. Network Enable "Luther", "Clarke", "Donham", "Fitzgerald", "Austen", "PressBooks Publisher One", and any other
-    PressBooks theme you want to use.
+ 6. Network Enable "Luther", "Clarke", "Donham", "Fitzgerald", "Austen", "Pressbooks Publisher One", and any other
+    Pressbooks theme you want to use.
 
  7. Navigate to: Settings → Network Settings.
 
  8. Pick the most appropriate Registration Setting:
     + User accounts may be registered. (do not use this setting, since it will not allow users to create new books)
-    + Logged in users may register new sites. (if you are a publisher using PressBooks as a production tool, this is the
+    + Logged in users may register new sites. (if you are a publisher using Pressbooks as a production tool, this is the
       best setting: it allows network administrators to add new users, who can then create books/sites. However,
       registration is not available to the public.)
     + Both sites and user accounts can be registered. (use this setting if you intend on offering a publishing-platform
-      open to the public, such as PressBooks.com)
+      open to the public, such as Pressbooks.com)
 
  9. Navigate to: My Books → __YOUR_SITE__ → Dashboard
 
- 10. Navigate to: Appearance. Activate "PressBooks Publisher One"
+ 10. Navigate to: Appearance. Activate "Pressbooks Publisher One"
 
  11. Navigate to: My Books → Network Admin → Sites
 
@@ -90,12 +90,17 @@ IMPORTANT!
 
  15. Navigate to: Text → Organize. Make sure some content is selected for export.
 
-*Part 3, PressBooks dependencies:*
+*Part 3, Pressbooks dependencies:*
 
  * For PDF export install [Prince](http://pressbooks.com/prince) (note: this is not free software) - Version 9.0
+ * For PDF export via mPDF ensure that the following folders have write access and/or they are owned by the appropriate user.See http://codex.wordpress.org/Changing_File_Permissions for more details on adjusting file permissions.
+   + wp-content/plugins/pressbooks/symbionts/mpdf/ttfontdata
+   + wp-content/plugins/pressbooks/symbionts/mpdf/tmp
+   + wp-content/plugins/pressbooks/symbionts/mpdf/graph_cache
  * For MOBI export install [KindleGen](http://www.amazon.com/gp/feature.html?docId=1000765211) - Version 2.9
  * For EPUB validation install [EpubCheck](http://code.google.com/p/epubcheck/) - Version 3.0.1
- * Form XML validation install [xmllint](http://xmlsoft.org/xmllint.html) - Version 20800
+ * For XML validation install [xmllint](http://xmlsoft.org/xmllint.html) - Version 20800
+ * Certain Linux installations do not ship with the php5-xsl library enabled by default.  If you attempt to export an ePub and get a either a white screen with minimal text, or a "Fatal error: Class 'XSLTProcessor' not found" error, you may need to run a command like "apt-get install php5-xsl" 
 
 Unlisted versions are not supported. Upgrade/downgrade accordingly.
 
@@ -138,7 +143,7 @@ Example config files for a dev site hosted at http://localhost/~dac514/textopres
 	define('BLOG_ID_CURRENT_SITE', 1);
 
 	/**
-	 * PressBooks
+	 * Pressbooks
 	 */
 	define( 'PB_PRINCE_COMMAND', '/usr/bin/prince' );
 	define( 'PB_KINDLEGEN_COMMAND', '/home/dac514/bin/kindlegen' );
@@ -190,10 +195,97 @@ TK.
 
 == Changelog ==
 
+= 2.6.1 =
+* Fixed issues with subsection parsing where <h1> tags had inline styles or were wrapped in other block elements.
+* Fixed an issue where changing a book's language to "English" as opposed to "English (United States)" would fail to override the network's language setting.
+* Updated documentation.
+
+= 2.6 =
+* Requires WordPress 4.3.
+* The language selected on the book info page now applies to the book's webbook display.
+* The language selected on the network settings page now applies automatically to new books and users.
+* The language selected on a user's profile now overrides the network and book languages when they view the Pressbooks dashboard.
+
+= 2.5.4 =
+* Requires WordPress 4.2.4.
+* Added Disable Comments (migrated from Pressbooks Textbook, props to @bdolor and the plugin's creators).
+* Added a warning message when users upload a cover image above the recommended size.
+* Optimized \PressBooks\Book::getBookStructure() so as to only fetch export status during export routines (props to @bracken).
+* Fixed a conflict with Jetpack (props to @programmieraffe for the bug report).
+* Fixed an issue where chapters were being number in mPDF TOCs regardless of user preference (props to @bdolor for the fix and to @sswettenham for the bug report).
+* Fixed an issue where sections would be parsed unnecessarily in webbooks (props to @bracken).
+* Fixed two issues related to permissive private content (props to @marcusschiesser for the bug reports).
+* Fixed an issue that caused a recursion during PDF export (props to @bseeger for the bug report).
+
+= 2.5.3 =
+* Added option to allow logged-in subscribers, contributors and authors to view a book's private content (props to @marcusschiesser for the feature request).
+* Fixed an issue where the webbook TOC would not be displayed for any user who was not logged in (props to @sswettenham for the bug report).
+* Fixed an issue where the media folder was not being deleted after ODT exports without a cover image.
+
+= 2.5.2 =
+* Added MCE Superscript & Subscript Buttons (migrated from Pressbooks Textbook, props to @bdolor and the plugin's creators).
+* Improved ODT export: temporary files are now deleted when export fails (props to @sswettenham for the bug report).
+* Improved user catalog: book covers are now clickable links (props to @kdv24).
+* Improved user catalog: sidebars are sized to fit content instead of being restricted to window height (props to @changemachine).
+* Fixed an issue where private chapters would appear in webbook TOC for logged-in users without the permissions to actually view them (props to @marcusschiesser for the bug report).
+
+= 2.5.1 =
+* Added MCE Table Editor (migrated from Pressbooks Textbook, props to @bdolor and the plugin's creators).
+* Added support for excluding root domains _and_ subdomains in `show_experimental_features()` function.
+* Added the ability to toggle social media integration on or off in webbooks (props to @bdolor).
+* Added the ability to restrict specific network administrators' access to some network administration pages.
+* Added a note in readme.txt indicating that `php5-xsl` is a required extension for certain exports (props to @jflowers45).
+* Added a function to intelligently load plugins in `/symbionts` so as to avoid conflicts (props to @bdolor and the Pressbooks Textbook team for providing the basis for this).
+* Forced Google webfonts to load via SSL (props to @bdolor).
+* Improved editor style so that large images fit the editing window (props to @hughmcguire).
+* Improved Javascript related to the sidebar table of contents in webbooks (props to @changemachine and @kdv24).
+* Improved logic related to maximum import size reporting (props to @jflowers45).
+* Improved styles associated with the accessibility plugin (props to @bdolor).
+* Improved XSL for ODT export.
+* Restored login screen branding in Pressbooks Publisher 2.0.
+* Restored user catalog links in Pressbooks Publisher 2.0.
+* Fixed a database error in user catalogs (props to @bdolor for the bug report).
+* Fixed an issue where books would overlap on the user catalog page (props to @bracken and @changemachine).
+* Fixed an issue where cover images and LaTex images would be omitted from ODT exports (props to @bdolor for the bug report and for assistance in solving this).
+* Fixed an issue where embedded audio files would be hidden in exports because of an inline style (props to @bdolor).
+* Fixed an issue where the `introduction` class would not be applied in certain exports.
+* Fixed an issue where exports would fail because the `get_user_by` function was being improperly namespaced (props to @borayeris for the bug report).
+
+= 2.5 =
+* Requires WordPress 4.2.2.
+* New root theme, Pressbooks Publisher 2.0. Pressbooks Publisher One has been deprecated and is now available (unsupported) [here](https://github.com/pressbooks/pressbooks-publisher-one/).
+* Added centralized `show_experimental_features()` function to control where such things appear.
+* Added experimental PDF export via mPDF as an open source alternative to Prince (props to @bdolor).
+* Added fallbacks for title, author and cover image fetching in `getBookInformation()` function.
+* Improved image fetching in ODT export (props to @bdolor).
+* Improved import of Pressbooks XML files (props to @bdolor).
+* Fixed issue where the API could show chapters as appearing in the wrong part (props to @bdolor).
+* Fixed issue where entities would be improperly loaded in XML document in ODT export (props to @bdolor).
+* Fixed issue with the network administration menu in the admin bar.
+* Fixed issue with spacing and punctuation in webbook license module output.
+
+= 2.4.5 =
+* Requires WordPress 4.2.1.
+
+= 2.4.4 =
+* Requires WordPress 4.2.
+* Added experimental ODT export capability.
+* Fixed issue where useful backslashes were stripped on import (props to @lukaiser for identifying this issue).
+
 = 2.4.3 =
+* Requires WordPress 4.1.2.
 * Removed Hpub export routines.
 * Made links inside the `[footnote]` shortcode clickable (props to @bdolor).
+* Added accessibility plugin to allow font size increases in webbook and PDF exports (props to @BakingSoda and @bdolor).
+* Added some instructional text to Book Info page.
+* Fixed character encoding issue with the TOC display of subsection titles.
+* Fixed internal links for subdirectory installs within PDF exports (props to @bdolor).
 * Fixed issue with catalog page in WebKit browsers (props to @bdolor).
+* Fixed potential XSS attack via `remove_query_arg` (see: https://blog.sucuri.net/2015/04/security-advisory-xss-vulnerability-affecting-multiple-wordpress-plugins.html; props to @bdolor).
+* Fixed variable-related warnings on RESTful API when debugging mode is enabled (props to @julienCXX).
+* Fixed XHTML export issue with respect to determining the introduction part or chapter for page numbering.
+* Updated included custom-metadata plugin to fix `array_reverse` bug (@props to bdolor).
+* Swedish translation (props to @chrillep).
 
 = 2.4.2 =
 * Fixed licenses.
@@ -211,7 +303,7 @@ TK.
 * Fixed bug that broke the running head in PDF exports.
 * Fixed bug that broke internal links in PDF exports.
 * Fixed bug that caused the Chapter Types menu item to be displayed twice for certain users.
-* Beta PressBooks API (props to @bdolor; see http://pressbooks.com/api/v1/docs).
+* Beta Pressbooks API (props to @bdolor; see http://pressbooks.com/api/v1/docs).
 * Collapsible TOCs for webbooks (props to @drlippman).
 * Import enhancements (props to @bdolor).
 * EPUB export enhancements (props to @bdolor).

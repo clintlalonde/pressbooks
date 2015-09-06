@@ -1,6 +1,6 @@
 <?php
 /**
- * @author  PressBooks <code@pressbooks.com>
+ * @author  Pressbooks <code@pressbooks.com>
  * @license GPLv2 (or any later version)
  */
 
@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) )
 // Includes
 // -------------------------------------------------------------------------------------------------------------------
 
+require( PB_PLUGIN_DIR . 'admin/pb-admin-branding.php' );
 require( PB_PLUGIN_DIR . 'includes/pb-utility.php' );
 require( PB_PLUGIN_DIR . 'includes/pb-image.php' );
 require( PB_PLUGIN_DIR . 'includes/pb-l10n.php' );
@@ -21,11 +22,20 @@ require( PB_PLUGIN_DIR . 'includes/pb-taxonomy.php' );
 require( PB_PLUGIN_DIR . 'includes/pb-media.php' );
 require( PB_PLUGIN_DIR . 'symbionts/pb-latex/pb-latex.php' );
 
+PressBooks\Utility\include_plugins();
+
+// -------------------------------------------------------------------------------------------------------------------
+// Login screen branding
+// -------------------------------------------------------------------------------------------------------------------
+
+add_action( 'login_head', '\PressBooks\Admin\Branding\custom_login_logo' );
+add_filter( 'login_headerurl', '\PressBooks\Admin\Branding\login_url' );
+add_filter( 'login_headertitle', '\PressBooks\Admin\Branding\login_title' );
+
 // -------------------------------------------------------------------------------------------------------------------
 // Custom Metadata plugin
 // -------------------------------------------------------------------------------------------------------------------
 
-require( PB_PLUGIN_DIR . 'symbionts/custom-metadata/custom_metadata.php' );
 add_filter( 'custom_metadata_manager_wysiwyg_args_field_pb_custom_copyright', '\PressBooks\Editor::metadataManagerDefaultEditorArgs' );
 add_filter( 'custom_metadata_manager_wysiwyg_args_field_pb_about_unlimited', '\PressBooks\Editor::metadataManagerDefaultEditorArgs' );
 
@@ -38,9 +48,12 @@ add_filter( 'gettext', '\PressBooks\L10n\override_core_strings', 10, 3 );
 
 if ( \PressBooks\Book::isBook() && \PressBooks\l10n\use_book_locale() ) {
 	add_filter( 'locale', '\PressBooks\Export\Export::setLocale' );
-} else {
+} elseif ( \PressBooks\Book::isBook() ) {
 	add_filter( 'locale', '\PressBooks\L10n\set_locale' );
+} elseif ( ! \PressBooks\Book::isBook() ) {
+	add_filter( 'locale', '\PressBooks\L10n\set_root_locale' );
 }
+add_action( 'user_register', '\PressBooks\L10n\set_user_interface_lang', 10, 1 );
 
 // -------------------------------------------------------------------------------------------------------------------
 // Images
@@ -116,6 +129,9 @@ add_action( 'do_robotstxt', '\PressBooks\Utility\add_sitemap_to_robots_txt' );
 // -------------------------------------------------------------------------------------------------------------------
 // Shortcodes
 // -------------------------------------------------------------------------------------------------------------------
+
+remove_filter( 'the_content', 'wpautop' );
+add_filter( 'the_content', 'wpautop' , 12); // execute wpautop after shortcode processing
 
 $_ = \PressBooks\Shortcodes\Footnotes\Footnotes::getInstance();
 $_ = \PressBooks\Shortcodes\Generics\Generics::getInstance();
